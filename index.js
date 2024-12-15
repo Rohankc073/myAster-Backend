@@ -11,7 +11,7 @@ app.use(express.json())
 app.use("/user",userRoutes)
 app.use('/', authRoutes);
 app.use('/uploads', express.static('uploads')); // Serve uploaded files
-app.use('/api/products', productRoutes);
+app.use('/products', productRoutes);
 app.use('/patient',patientRoutes);
 app.use(express.json());
 
