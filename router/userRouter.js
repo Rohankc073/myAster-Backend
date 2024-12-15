@@ -8,4 +8,5 @@ const upload = require('../config/uploads');
 router.post('/save', postData);
 router.get('/get', getData);
 router.post('/add', upload.single('image'), addProduct);
+
 module.exports = router;
