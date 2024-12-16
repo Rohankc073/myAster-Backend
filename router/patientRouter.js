@@ -1,12 +1,21 @@
 const express = require('express');
-const {getData,postData, getById} = require('../controller/patientController');
-
-
+const { getData, postData, getByID, updateByID, deleteData } = require('../controller/patientController');
 
 const router = express.Router();
 
-router.post('/add',postData);
-router.get('/get',getData);
-router.get('/getById/:id', getById);
+// Add a new patient
+router.post('/add', postData);
+
+// Get all patients
+router.get('/get', getData);
+
+// Get a patient by ID
+router.get('/getById/:id', getByID);
+
+// Update a patient by ID
+router.put('/update/:id', updateByID);
+
+// Delete a patient by ID
+router.delete('/delete/:id', deleteData);
 
 module.exports = router;

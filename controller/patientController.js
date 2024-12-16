@@ -1,8 +1,9 @@
-const Patient = require('../models/patient');
+const User = require('../models/user');
 
+// Add a new patient
 const postData = async (req, res) => {
     try {
-        const patient = new Patient(req.body);
+        const patient = new User(req.body);
         await patient.save();
         res.status(201).json({ message: 'Data Saved', patient });
     } catch (error) {
@@ -10,9 +11,10 @@ const postData = async (req, res) => {
     }
 };
 
-const getData = async (req,res) =>{
+// Get all patients
+const getData = async (req, res) => {
     try {
-        const patients = await Patient.find(); // Fetch all patients from the database
+        const patients = await User.find(); // Fetch all patients from the database
         res.status(200).json(patients);
     } catch (error) {
         console.error('Error fetching patient data:', error.message);
@@ -20,29 +22,49 @@ const getData = async (req,res) =>{
     }
 };
 
-const getById = async (req, res) => {
+// Get a patient by ID
+const getByID = async (req, res) => {
     try {
         const { id } = req.params;
-
-        if (!id) {
-            return res.status(400).json({ message: "ID parameter is required." });
-        }
-
-        const patient = await Patient.findById(id);
-
+        const patient = await User.findById(id); // Find patient by ID
         if (!patient) {
-            return res.status(404).json({ message: "User not found." });
+            return res.status(404).json({ message: 'Patient not found' });
         }
-
         res.status(200).json(patient);
     } catch (error) {
-        if (error.name === "CastError") {
-            return res.status(400).json({ message: "Invalid ID format." });
-        }
-        console.error("Server Error:", error.message);
-        res.status(500).json({ message: "Something went wrong on our end. Please try again later." });
+        console.error('Error fetching patient by ID:', error.message);
+        res.status(500).json({ error: error.message });
     }
 };
 
+// Update a patient by ID
+const updateByID = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updatedPatient = await User.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
+        if (!updatedPatient) {
+            return res.status(404).json({ message: 'Patient not found' });
+        }
+        res.status(200).json({ message: 'Patient updated successfully', updatedPatient });
+    } catch (error) {
+        console.error('Error updating patient:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+};
 
-module.exports = {postData,getData,getById};
+// Delete a patient by ID
+const deleteData = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deletedPatient = await User.findByIdAndDelete(id);
+        if (!deletedPatient) {
+            return res.status(404).json({ message: 'Patient not found' });
+        }
+        res.status(200).json({ message: 'Patient deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting patient:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+module.exports = { postData, getData, getByID, updateByID, deleteData };

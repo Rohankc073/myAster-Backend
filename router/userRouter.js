@@ -1,12 +1,21 @@
-// routes/patientRoutes.js
 const express = require('express');
-const { addProduct } = require('../controller/productController');
-const { postData, getData } = require('../controller/userController');
+const { postData, getData, getByID, updateByID, deleteData } = require('../controller/userController');
+
 const router = express.Router();
-const upload = require('../config/uploads');
-// Define the route to post patient data
-router.post('/save', postData);
-router.get('/get', getData);
-router.post('/add', upload.single('image'), addProduct);
+
+// Add a new patient
+router.post('/add', postData);
+
+// Get all patients
+router.get('/all', getData);
+
+// Get a patient by ID
+router.get('/:id', getByID);
+
+// Update a patient by ID
+router.put('/update/:id', updateByID);
+
+// Delete a patient by ID
+router.delete('/:id', deleteData);
 
 module.exports = router;
