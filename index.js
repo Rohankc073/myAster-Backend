@@ -5,6 +5,7 @@ const connectDB = require("./config/db");
 const productRoutes = require("./router/productRouter")
 const authRoutes = require('./router/authRouter');
 const patientRoutes = require('./router/patientRouter')
+const appointmentRouter = require('./router/appointmentRouter');
 connectDB();
 
 app.use(express.json())
@@ -13,6 +14,7 @@ app.use('/', authRoutes);
 app.use('/uploads', express.static('uploads')); // Serve uploaded files
 app.use('/products', productRoutes);
 app.use('/patient',patientRoutes);
+app.use('/api/appointments', appointmentRouter);
 app.use(express.json());
 
 
