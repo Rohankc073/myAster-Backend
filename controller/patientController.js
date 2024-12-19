@@ -1,11 +1,11 @@
-const User = require('../models/user');
+const Patient = require('../models/patient'); // Use the correct model for patients
 
 // Add a new patient
 const postData = async (req, res) => {
     try {
-        const patient = new User(req.body);
+        const patient = new Patient(req.body); // Use the Patient model
         await patient.save();
-        res.status(201).json({ message: 'Data Saved', patient });
+        res.status(201).json({ message: 'Patient added successfully', patient });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -14,7 +14,7 @@ const postData = async (req, res) => {
 // Get all patients
 const getData = async (req, res) => {
     try {
-        const patients = await User.find(); // Fetch all patients from the database
+        const patients = await Patient.find(); // Fetch all patients from the database
         res.status(200).json(patients);
     } catch (error) {
         console.error('Error fetching patient data:', error.message);
@@ -26,7 +26,7 @@ const getData = async (req, res) => {
 const getByID = async (req, res) => {
     try {
         const { id } = req.params;
-        const patient = await User.findById(id); // Find patient by ID
+        const patient = await Patient.findById(id); // Find patient by ID
         if (!patient) {
             return res.status(404).json({ message: 'Patient not found' });
         }
@@ -41,7 +41,7 @@ const getByID = async (req, res) => {
 const updateByID = async (req, res) => {
     try {
         const { id } = req.params;
-        const updatedPatient = await User.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
+        const updatedPatient = await Patient.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
         if (!updatedPatient) {
             return res.status(404).json({ message: 'Patient not found' });
         }
@@ -56,7 +56,7 @@ const updateByID = async (req, res) => {
 const deleteData = async (req, res) => {
     try {
         const { id } = req.params;
-        const deletedPatient = await User.findByIdAndDelete(id);
+        const deletedPatient = await Patient.findByIdAndDelete(id);
         if (!deletedPatient) {
             return res.status(404).json({ message: 'Patient not found' });
         }
