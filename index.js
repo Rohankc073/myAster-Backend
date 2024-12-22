@@ -7,6 +7,9 @@ const authRoutes = require('./router/authRouter');
 const patientRoutes = require('./router/patientRouter')
 const appointmentRouter = require('./router/appointmentRouter');
 const doctorRouter = require('./router/doctorRouter');
+const cartRoutes = require('./router/cartRouter');
+
+const orderRoutes = require('./router/orderRouter');
 connectDB();
 
 app.use(express.json())
@@ -17,6 +20,8 @@ app.use('/products', productRoutes);
 app.use('/patient',patientRoutes);
 app.use('/doctors', doctorRouter);
 app.use('/appointments', appointmentRouter);
+app.use('/cart',cartRoutes);
+app.use("/order",orderRoutes)
 app.use(express.json());
 
 
