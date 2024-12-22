@@ -16,7 +16,7 @@ app.use('/uploads', express.static('uploads')); // Serve uploaded files
 app.use('/products', productRoutes);
 app.use('/patient',patientRoutes);
 app.use('/doctors', doctorRouter);
-app.use('/api/appointments', appointmentRouter);
+app.use('/appointments', appointmentRouter);
 app.use(express.json());
 
 

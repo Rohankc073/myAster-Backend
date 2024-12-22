@@ -12,7 +12,7 @@ const router = express.Router();
 router.post('/schedule', scheduleAppointment);
 
 // Get all appointments
-router.get('/', getAllAppointments);
+router.get('/getAll', getAllAppointments);
 
 // Get an appointment by ID
 router.get('/:id', getAppointmentById);

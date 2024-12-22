@@ -23,3 +23,8 @@ router.get('/:doctorId/appointments', getDoctorAppointments); // Get all appoint
 router.put('/appointments/:appointmentId/cancel', cancelDoctorAppointment); // Cancel a specific appointment for a doctor
 
 module.exports = router;
+
+
+// 67638648bdc9a72f3e34247c
+
+// 674dc9ea8211e0f36e4576cb Pa
