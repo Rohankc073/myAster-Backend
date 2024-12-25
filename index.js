@@ -8,7 +8,7 @@ const patientRoutes = require('./router/patientRouter')
 const appointmentRouter = require('./router/appointmentRouter');
 const doctorRouter = require('./router/doctorRouter');
 const cartRoutes = require('./router/cartRouter');
-
+const reviewRoutes = require('./router/reviewRouter');
 const orderRoutes = require('./router/orderRouter');
 connectDB();
 
@@ -22,6 +22,7 @@ app.use('/doctors', doctorRouter);
 app.use('/appointments', appointmentRouter);
 app.use('/cart',cartRoutes);
 app.use("/order",orderRoutes)
+app.use('/review',reviewRoutes)
 app.use(express.json());
 
 
