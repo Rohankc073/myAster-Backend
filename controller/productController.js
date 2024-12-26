@@ -6,7 +6,7 @@ const path = require('path');
 const addProduct = async (req, res) => {
     try {
         const { name, price, description } = req.body;
-        const image = req.file ? `/uploads/${req.file.filename}` : null; // Local image path
+        const image = req.file ? `/uploads/product/${req.file.filename}` : null; // Local image path
 
         const product = new Product({
             name,
