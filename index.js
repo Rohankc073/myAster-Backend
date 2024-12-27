@@ -11,6 +11,7 @@ const cartRoutes = require('./router/cartRouter');
 const reviewRoutes = require('./router/reviewRouter');
 const orderRoutes = require('./router/orderRouter');
 const serviceRouter = require('./router/serviceRouter');
+const serviceBookingRouter = require('./router/service_bookingRouter')
 connectDB();
 
 app.use(express.json())
@@ -25,9 +26,8 @@ app.use('/cart',cartRoutes);
 app.use("/order",orderRoutes)
 app.use('/review',reviewRoutes)
 app.use('/services',serviceRouter)
+app.use('/booking',serviceBookingRouter)
 app.use(express.json());
-
-
 
 // Start the server
 const PORT = 5003;

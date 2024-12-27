@@ -1,13 +1,20 @@
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
+
 const ServiceBookingSchema = new Schema(
-    {
-      patientId: { type: Schema.Types.ObjectId, ref: 'Patient', required: true },
-      serviceId: { type: Schema.Types.ObjectId, ref: 'Service', required: true },
-      date: { type: Date, required: true }, // Appointment date for the service
-      status: { type: String, enum: ['Scheduled', 'Completed', 'Cancelled'], default: 'Scheduled' }, // Booking status
+  {
+    patientId: { type: Schema.Types.ObjectId, ref: "Patient", required: true }, // Reference to Patient model
+    serviceId: { type: Schema.Types.ObjectId, ref: "Service", required: true }, // Reference to Service model
+    date: { type: Date, required: true }, // Date of the service booking
+    status: {
+      type: String,
+      enum: ["Scheduled", "Completed", "Cancelled"],
+      default: "Scheduled",
     },
-    { timestamps: true }
-  );
-  
-  const ServiceBooking = mongoose.model('ServiceBooking', ServiceBookingSchema);
-  module.exports = ServiceBooking;
-  
+  },
+  { timestamps: true } // Automatically adds createdAt and updatedAt fields
+);
+
+const ServiceBooking = mongoose.model("ServiceBooking", ServiceBookingSchema);
+
+module.exports = ServiceBooking;
