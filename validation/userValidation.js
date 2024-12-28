@@ -17,3 +17,5 @@ function userValidation(req, res, next){
 }
 
 module.exports=userValidation
+
+
