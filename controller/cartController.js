@@ -7,7 +7,7 @@ const addToCart = async (req, res) => {
   
       // Check if the user already has a cart
       let cart = await Cart.findOne({ userId });
-  
+       
       if (!cart) {
         // If no cart exists, create a new one
         cart = new Cart({
