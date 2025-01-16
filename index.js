@@ -16,7 +16,7 @@ connectDB();
 
 app.use(express.json())
 app.use("/user",userRoutes)
-app.use('/', authRoutes);
+app.use('/auth', authRoutes);
 app.use('/uploads', express.static('uploads')); // Serve uploaded files
 app.use('/products', productRoutes);
 app.use('/patient',patientRoutes);

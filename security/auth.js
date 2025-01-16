@@ -1,31 +1,30 @@
-const jwt=require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
+// Authentication middleware
+const authentication = (req, res, next) => {
+    const token = req.header('Authorization')?.split(" ")[1];
+    if (!token) {
+        return res.status(401).json({ message: "No token provided. Access denied!" });
+    }
 
-function authorization(req, res, next){
     try {
-        const token = req?.header('Authorization')?.split(" ")[1];
-        if (!token) {
-            res.status(401).json({
-                message: "Unauthorized. No Token!"
-            });
+        const decoded = jwt.verify(token, process.env.SECRET_KEY);
+        req.user = decoded; // Store user data in request object
+        next();
+    } catch (error) {
+        res.status(403).json({ message: "Invalid or expired token" });
+    }
+};
 
-        } else {
-            try{
-                const verified = jwt.verify(token,"hRyJe0Lb1DJSAq8Eaoj7SbjsvFmAjiWU")
-                req.user=verified;
-                next();                                          
-            }catch(e){
-                res.status(400).json({
-                    message:"Invalid Token"
-                });
-            }
-
+// Authorization middleware
+const authorizeRoles = (...roles) => {
+    return (req, res, next) => {
+        if (!roles.includes(req.user.role)) {
+            return res.status(403).json({ message: "Access denied: Insufficient permissions" });
         }
-    } catch(e){
-            res.status(400).json({
-                message:"Unauthorized"
-            });
-        }
-}
+        next();
+    };
+};
 
-module.exports={authorization}
+module.exports = { authentication, authorizeRoles };
