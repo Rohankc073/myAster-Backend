@@ -7,7 +7,7 @@ const {
     deleteData 
 } = require('../controller/userController');
 
-const { authentication, authorizeRoles } = require('../middleware/auth');
+const { authentication, authorizeRoles } = require('../middleware/roleValidation');
 
 const router = express.Router();
 
