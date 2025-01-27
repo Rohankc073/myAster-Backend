@@ -11,8 +11,16 @@ const cartRoutes = require('./router/cartRouter');
 const reviewRoutes = require('./router/reviewRouter');
 const orderRoutes = require('./router/orderRouter');
 const serviceRouter = require('./router/serviceRouter');
+const cors = require("cors");
 const serviceBookingRouter = require('./router/service_bookingRouter')
 connectDB();
+
+// Enable CORS
+app.use(cors({
+    origin: "http://localhost:5173", // Allow your frontend to access this server
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true, // Allow cookies if needed
+}));
 
 app.use(express.json())
 app.use("/user",userRoutes)

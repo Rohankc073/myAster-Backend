@@ -6,35 +6,40 @@ require('dotenv').config();
 // Register a new user (Patient, Admin, or Doctor)
 const registerUser = async (req, res) => {
     try {
-        const { name, email, password, phone, age, gender, role } = req.body;
+        console.log("Received signup request:", req.body);
 
-        // Check if the user already exists
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ message: 'Email already registered' });
+        const { name, email, password, phone, role } = req.body;
+
+        if (!name || !email || !password || !phone) {
+            return res.status(400).json({ message: "All fields are required" });
         }
 
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            console.log("User already exists:", email);
+            return res.status(400).json({ message: "Email already registered" });
+        }
 
-        // Create a new user
+        const hashedPassword = await bcrypt.hash(password, 10);
         const user = new User({
             name,
             email,
-            password: hashedPassword, // Save hashed password
+            password: hashedPassword,
             phone,
-            age,
-            gender,
-            role: role || 'Patient', // Default role is 'Patient' if not provided
+            role: role || "Patient",
         });
 
         await user.save();
 
-        res.status(201).json({ message: 'User registered successfully', user: { name, email, role } });
+        console.log("User registered successfully:", user);
+        res.status(201).json({ message: "User registered successfully", user: { name, email, role } });
+
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error("Signup error:", error.message);
+        res.status(500).json({ message: "Server error" });
     }
 };
+
 
 // Login a user (Patient, Admin, or Doctor)
 const loginUser = async (req, res) => {
