@@ -52,13 +52,6 @@ const loginUser = async (req, res) => {
         if (!user || !(await bcrypt.compare(password, user.password))) {
             return res.status(403).send({ message: "Invalid email or password" });
         }
-
-        // // Compare the provided password with the stored hashed password
-        // const isPasswordValid = await bcrypt.compare(password, user.password);
-        // if (!isPasswordValid) {
-        //     return res.status(401).json({ message: 'Invalid email or password' });
-        // }
-
         // Generate JWT token with role and expiry time
         const token = jwt.sign(
             { id: user._id, email: user.email, role: user.role }, // Payload: user ID and role
