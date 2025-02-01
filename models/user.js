@@ -2,12 +2,14 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const { type } = require('os');
 
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     phone: { type: String, required: true },
+    image: { type: String, default: null }, 
     role: { type: String, enum: ["Admin", "Doctor", "Patient"], default: "Patient" }, // Role field
     resetPasswordToken: String,
     resetPasswordExpire: Date,

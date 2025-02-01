@@ -4,7 +4,10 @@ const productSchema = new mongoose.Schema({
     name: { type: String, required: true },
     price: { type: Number, required: true },
     description: { type: String },
-    image: { type: String, required: true }, // URL or local path
+    image: {
+        type: String,
+        default: null,
+      }, // URL or local path
 });
 
 const Product = mongoose.model('Product', productSchema);

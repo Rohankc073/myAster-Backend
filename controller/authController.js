@@ -6,8 +6,8 @@ require('dotenv').config();
 // Generate JWT Token
 const generateToken = (user) => {
     return jwt.sign(
-        { id: user._id, email: user.email, role: user.role }, 
-        process.env.JWT_SECRET, 
+        { id: user._id, email: user.email, role: user.role },
+        process.env.JWT_SECRET,
         { expiresIn: process.env.JWT_EXPIRE || "2h" }
     );
 };
@@ -28,11 +28,12 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: "Email already registered" });
         }
 
-        // const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10); // Hash the password
+
         const user = await User.create({
             name,
             email,
-            password,
+            password: hashedPassword,
             phone,
             role: role || "Patient",
         });
@@ -82,4 +83,23 @@ const loginUser = async (req, res) => {
     }
 };
 
-module.exports = { registerUser, loginUser };
+// Upload Image (Consistent style with loginUser)
+const uploadImage = async (req, res) => {
+    try {
+        // Check if a file was uploaded
+        if (!req.file) {
+            return res.status(400).json({ message: "Please upload a file" });
+        }
+
+        // Return the filename of the uploaded image
+        res.status(200).json({
+            success: true,
+            data: req.file.filename, // Filename of the uploaded image
+        });
+    } catch (error) {
+        console.error("Image upload error:", error.message);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+module.exports = { registerUser, loginUser, uploadImage };
