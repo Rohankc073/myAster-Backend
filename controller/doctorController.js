@@ -1,38 +1,85 @@
 const Doctor = require('../models/doctor');
 const Appointment = require('../models/appointment');
+const multer = require('multer');
 
-// Create a new doctor
+// 📌 Configure Multer for Image Upload
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); // Store images in 'uploads/' directory
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname); // Unique filename
+  }
+});
+
+const upload = multer({ storage: storage });
+
+/** 
+ * ✅ Create a new doctor
+ * - Converts `availableDays` to actual Date values
+ * - Converts `availableTimes` into objects (`start`, `end`)
+ * - Handles image upload
+ */
 const createDoctor = async (req, res) => {
   try {
     const { name, specialization, availableDays, availableTimes, contact, email } = req.body;
+    const image = req.file ? req.file.path : null; // Handling image upload
+
+    if (!name || !specialization || !contact || !email || !availableDays || !availableTimes) {
+      return res.status(400).json({ error: "Missing required fields. Ensure all fields are provided." });
+    }
+
+    // Convert availableDays from strings to Date objects
+    const parsedAvailableDays = availableDays.split(",").map(day => new Date(day.trim()));
+
+    // Convert availableTimes into structured time objects
+    const parsedAvailableTimes = availableTimes.split(",").map(time => {
+      const [startTime, endTime] = time.trim().split("-");
+      return { startTime: startTime.trim(), endTime: endTime.trim() };
+    });
 
     const newDoctor = new Doctor({
       name,
       specialization,
-      availableDays,
-      availableTimes,
+      availableDays: parsedAvailableDays,
+      availableTimes: parsedAvailableTimes,
       contact,
       email,
+      image,
     });
 
     await newDoctor.save();
-    res.status(201).json({ message: 'Doctor created successfully', newDoctor });
+    res.status(201).json({ message: "Doctor created successfully", newDoctor });
   } catch (error) {
-    res.status(400).json({ error: 'Error creating doctor', details: error.message });
+    res.status(400).json({ error: "Error creating doctor", details: error.message });
   }
 };
 
-// Get all doctors
+/** 
+ * ✅ Get all doctors
+ * - Retrieves all doctors including their images, date, and time
+ */
 const getAllDoctors = async (req, res) => {
   try {
     const doctors = await Doctor.find();
-    res.status(200).json(doctors);
+    
+    // ✅ Ensure the full image URL is included
+    const updatedDoctors = doctors.map((doctor) => ({
+      ...doctor._doc,
+      image: doctor.image ? `http://localhost:5003/${doctor.image}` : null, // Full URL
+    }));
+
+    res.status(200).json(updatedDoctors);
   } catch (error) {
-    res.status(500).json({ error: 'Error fetching doctors', details: error.message });
+    res.status(500).json({ error: "Error fetching doctors", details: error.message });
   }
 };
 
-// Get a doctor by ID
+
+/** 
+ * ✅ Get doctor by ID
+ * - Retrieves a single doctor's details
+ */
 const getDoctorById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -48,11 +95,29 @@ const getDoctorById = async (req, res) => {
   }
 };
 
-// Update a doctor
+/** 
+ * ✅ Update doctor details
+ * - Allows updating doctor details, including `date`, `time`, and `image`
+ */
 const updateDoctor = async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
+
+    if (updates.availableDays) {
+      updates.availableDays = updates.availableDays.split(",").map(day => new Date(day.trim()));
+    }
+
+    if (updates.availableTimes) {
+      updates.availableTimes = updates.availableTimes.split(",").map(time => {
+        const [start, end] = time.trim().split("-");
+        return { start: start.trim(), end: end.trim() };
+      });
+    }
+
+    if (req.file) {
+      updates.image = `/uploads/${req.file.filename}`;
+    }
 
     const updatedDoctor = await Doctor.findByIdAndUpdate(id, updates, { new: true });
 
@@ -66,7 +131,10 @@ const updateDoctor = async (req, res) => {
   }
 };
 
-// Delete a doctor
+/** 
+ * ✅ Delete doctor
+ * - Removes doctor record from the database
+ */
 const deleteDoctor = async (req, res) => {
   try {
     const { id } = req.params;
@@ -83,7 +151,10 @@ const deleteDoctor = async (req, res) => {
   }
 };
 
-// Get all appointments for a specific doctor
+/** 
+ * ✅ Get all appointments for a specific doctor
+ * - Fetches appointments assigned to a doctor
+ */
 const getDoctorAppointments = async (req, res) => {
   try {
     const { doctorId } = req.params;
@@ -98,7 +169,10 @@ const getDoctorAppointments = async (req, res) => {
   }
 };
 
-// Cancel an appointment for a doctor
+/** 
+ * ✅ Cancel a doctor's appointment
+ * - Updates appointment status to 'cancelled'
+ */
 const cancelDoctorAppointment = async (req, res) => {
   try {
     const { appointmentId } = req.params;
@@ -127,4 +201,5 @@ module.exports = {
   deleteDoctor,
   getDoctorAppointments,
   cancelDoctorAppointment,
+  upload // Export upload middleware for image handling
 };

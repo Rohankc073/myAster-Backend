@@ -2,99 +2,120 @@ const Product = require('../models/products');
 const fs = require('fs');
 const path = require('path');
 
-// Add a new product
+// ✅ Add a new product (Medicine)
 const addProduct = async (req, res) => {
     try {
-        const { name, price, description } = req.body;
-        const image = req.file ? `/uploads/product/${req.file.filename}` : null; // Local image path
+        const { name, genericName, manufacturer, price, quantity, dosage, requiresPrescription, category, description } = req.body;
+        const image = req.file ? `/uploads/products/${req.file.filename}` : "/uploads/products/default.jpg"; // Default image if none is uploaded
 
         const product = new Product({
             name,
+            genericName,
+            manufacturer,
             price,
+            quantity,
+            dosage,
+            requiresPrescription,
+            category,
             description,
-            image, // Save the image path to the database
+            image,
         });
 
         await product.save();
-        res.status(201).json({ message: 'Product added successfully', product });
+        res.status(201).json({ message: '✅ Product added successfully', product });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 };
 
-// Fetch all products
+// ✅ Fetch all medicines (Ensure image URL is correct)
 const getProducts = async (req, res) => {
     try {
         const products = await Product.find();
-        res.status(200).json(products);
+
+        // Update image URLs to be full paths
+        const updatedProducts = products.map(product => ({
+            ...product._doc,
+            image: product.image.startsWith("/uploads")
+                ? `http://localhost:5003${product.image}`
+                : product.image
+        }));
+
+        res.status(200).json(updatedProducts);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
-// Update a product by ID
+// ✅ Fetch product by ID
+const getProductById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const product = await Product.findById(id);
+        if (!product) return res.status(404).json({ message: '❌ Product not found' });
+
+        // Update image URL
+        const updatedProduct = {
+            ...product._doc,
+            image: product.image.startsWith("/uploads")
+                ? `http://localhost:5003${product.image}`
+                : product.image
+        };
+
+        res.status(200).json(updatedProduct);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// ✅ Update a product
 const updateProduct = async (req, res) => {
     try {
-        const { id } = req.params; // Get product ID from URL
-        const { name, price, description } = req.body;
+        const { id } = req.params;
+        const { name, genericName, manufacturer, price, quantity, dosage, requiresPrescription, category, description } = req.body;
 
-        // Handle image update if provided
-        let updatedData = { name, price, description };
+        let updatedData = { name, genericName, manufacturer, price, quantity, dosage, requiresPrescription, category, description };
+
+        // If a new image is uploaded, update the image path
         if (req.file) {
-            updatedData.image = `/uploads/${req.file.filename}`; // Save new image path
+            updatedData.image = `/uploads/products/${req.file.filename}`;
         }
 
-        // Update the product in the database
         const product = await Product.findByIdAndUpdate(id, updatedData, { new: true });
+        if (!product) return res.status(404).json({ message: '❌ Product not found' });
 
-        if (!product) {
-            return res.status(404).json({ message: 'Product not found' });
-        }
-
-        res.status(200).json({ message: 'Product updated successfully', product });
+        res.status(200).json({ message: '✅ Product updated successfully', product });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
-// Delete a product by ID
+// ✅ Delete a product
 const deleteProduct = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Find the product
+        // Ensure product exists before deleting
         const product = await Product.findById(id);
         if (!product) {
-            return res.status(404).json({ message: 'Product not found' });
+            return res.status(404).json({ message: '❌ Product not found' });
         }
 
-        // Delete the image if it exists
-        if (product.image) {
+        // Delete the product image from the server if exists
+        if (product.image && product.image !== "/uploads/products/default.jpg") {
             const imagePath = path.join(__dirname, '..', product.image);
-            fs.unlinkSync(imagePath); // Delete image from uploads folder
+            if (fs.existsSync(imagePath)) {
+                fs.unlinkSync(imagePath); // Delete file safely
+            }
         }
 
-        // Delete the product
         await Product.findByIdAndDelete(id);
+        res.status(200).json({ message: '✅ Product deleted successfully' });
 
-        res.status(200).json({ message: 'Product deleted successfully' });
     } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
-const getProductById = async (req, res) => {
-    try {
-        const { id } = req.params; // Get the ID from the URL params
-        const product = await Product.findById(id);
-
-        if (!product) {
-            return res.status(404).json({ message: 'Product not found' });
-        }
-
-        res.status(200).json(product);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error("❌ Delete Error:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 };
 
-module.exports = { addProduct, getProducts, updateProduct, deleteProduct,getProductById };
+module.exports = { addProduct, getProducts, updateProduct, deleteProduct, getProductById };

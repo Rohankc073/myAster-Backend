@@ -10,25 +10,28 @@ const doctorSchema = new mongoose.Schema({
     required: true,
   },
   availableDays: {
-    type: [String], // Example: ['Monday', 'Wednesday', 'Friday']
+    type: [Date], // Storing actual dates
     required: true,
   },
   availableTimes: {
-    type: [String], // Example: ['10:00 AM - 12:00 PM', '2:00 PM - 4:00 PM']
+    type: [{ startTime: String, endTime: String }], // Storing time slots
     required: true,
   },
   contact: {
     type: String,
     required: true,
-    unique: true, // Ensures no duplicate contacts for doctors
+    unique: true,
   },
   email: {
     type: String,
     required: true,
-    unique: true, // Ensures no duplicate emails for doctors
+    unique: true,
   },
-}, { timestamps: true }); // Adds createdAt and updatedAt fields automatically
+  image: {
+    type: String, // Store the image URL or file path
+    required: false,
+  },
+}, { timestamps: true });
 
 const Doctor = mongoose.model('Doctor', doctorSchema);
-
 module.exports = Doctor;
