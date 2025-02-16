@@ -1,9 +1,10 @@
 const User = require('../models/user'); // Ensure this points to the correct User model
+const Cart = require('../models/cart'); // Import Cart model
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
-// Generate JWT Token
+// ✅ Generate JWT Token
 const generateToken = (user) => {
     return jwt.sign(
         { id: user._id, email: user.email, role: user.role },
@@ -12,7 +13,7 @@ const generateToken = (user) => {
     );
 };
 
-// Register a new user (Patient, Admin, or Doctor)
+// ✅ Register a new user (Patient, Admin, or Doctor)
 const registerUser = async (req, res) => {
     try {
         console.log("Received signup request:", req.body);
@@ -38,6 +39,9 @@ const registerUser = async (req, res) => {
             role: role || "Patient",
         });
 
+        // ✅ Create an empty cart for the new user
+        await Cart.create({ userId: user._id, items: [] });
+
         const token = generateToken(user);
 
         res.status(201).json({
@@ -53,7 +57,7 @@ const registerUser = async (req, res) => {
     }
 };
 
-// Login a user (Patient, Admin, or Doctor)
+// ✅ Login a user (Patient, Admin, or Doctor)
 const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -70,11 +74,34 @@ const loginUser = async (req, res) => {
 
         const token = generateToken(user);
 
+        // ✅ Fetch user's cart during login
+        const cart = await Cart.findOne({ userId: user._id });
+
+        // ✅ Log the response to debug issues
+        console.log("✅ Login Response:", {
+            success: true,
+            message: "Login successful",
+            token,
+            user: {
+                _id: user._id, // ✅ Ensure _id is included
+                name: user.name,
+                email: user.email,
+                role: user.role
+            },
+            cart: cart || { userId: user._id, items: [] } // Return cart or empty cart
+        });
+
         res.status(200).json({
             success: true,
             message: "Login successful",
             token,
-            user: { name: user.name, email: user.email, role: user.role }
+            user: {
+                _id: user._id, // ✅ Ensure _id is included
+                name: user.name,
+                email: user.email,
+                role: user.role
+            },
+            cart: cart || { userId: user._id, items: [] } // Return cart or empty cart
         });
 
     } catch (error) {
@@ -83,7 +110,8 @@ const loginUser = async (req, res) => {
     }
 };
 
-// Upload Image (Consistent style with loginUser)
+
+// ✅ Upload Image (Consistent style with loginUser)
 const uploadImage = async (req, res) => {
     try {
         // Check if a file was uploaded

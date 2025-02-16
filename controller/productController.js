@@ -31,21 +31,14 @@ const addProduct = async (req, res) => {
 // ✅ Fetch all medicines (Ensure image URL is correct)
 const getProducts = async (req, res) => {
     try {
-        const products = await Product.find();
-
-        // Update image URLs to be full paths
-        const updatedProducts = products.map(product => ({
-            ...product._doc,
-            image: product.image.startsWith("/uploads")
-                ? `http://localhost:5003${product.image}`
-                : product.image
-        }));
-
-        res.status(200).json(updatedProducts);
+      const products = await Product.find({});
+    //   console.log("Total products found:", products.length); // ✅ Check how many products exist
+      res.json(products);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+      console.error("Error fetching products:", error);
+      res.status(500).json({ error: "Error fetching products" });
     }
-};
+  };
 
 // ✅ Fetch product by ID
 const getProductById = async (req, res) => {

@@ -9,14 +9,7 @@ const doctorSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  availableDays: {
-    type: [Date], // Storing actual dates
-    required: true,
-  },
-  availableTimes: {
-    type: [{ startTime: String, endTime: String }], // Storing time slots
-    required: true,
-  },
+
   contact: {
     type: String,
     required: true,

@@ -22,27 +22,20 @@ const upload = multer({ storage: storage });
  */
 const createDoctor = async (req, res) => {
   try {
-    const { name, specialization, availableDays, availableTimes, contact, email } = req.body;
+    const { name, specialization, contact, email } = req.body;
     const image = req.file ? req.file.path : null; // Handling image upload
 
-    if (!name || !specialization || !contact || !email || !availableDays || !availableTimes) {
+    if (!name || !specialization || !contact || !email ) {
       return res.status(400).json({ error: "Missing required fields. Ensure all fields are provided." });
     }
 
     // Convert availableDays from strings to Date objects
-    const parsedAvailableDays = availableDays.split(",").map(day => new Date(day.trim()));
-
-    // Convert availableTimes into structured time objects
-    const parsedAvailableTimes = availableTimes.split(",").map(time => {
-      const [startTime, endTime] = time.trim().split("-");
-      return { startTime: startTime.trim(), endTime: endTime.trim() };
-    });
+    
 
     const newDoctor = new Doctor({
       name,
       specialization,
-      availableDays: parsedAvailableDays,
-      availableTimes: parsedAvailableTimes,
+      
       contact,
       email,
       image,
@@ -201,5 +194,4 @@ module.exports = {
   deleteDoctor,
   getDoctorAppointments,
   cancelDoctorAppointment,
-  upload // Export upload middleware for image handling
 };
