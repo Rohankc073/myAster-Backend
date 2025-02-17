@@ -95,7 +95,26 @@ const cancelOrder = async (req, res) => {
   }
 };
 
+// ✅ Get all orders (Admin / System)
+const getAllOrders = async (req, res) => {
+  try {
+    const orders = await Order.find().populate('userId', 'name email').populate('items.productId', 'name price');
+    
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ message: "No orders found" });
+    }
+
+    res.status(200).json(orders);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching all orders", details: error.message });
+  }
+};
+
+
+
+
 module.exports = {
+  getAllOrders,
   placeOrder,
   getUserOrders,
   getOrderById,

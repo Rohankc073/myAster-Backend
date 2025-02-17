@@ -4,6 +4,7 @@ const {
   getUserOrders,
   getOrderById,
   updateOrderStatus,
+  getAllOrders,
   cancelOrder,
 } = require('../controller/ordersController');
 
@@ -11,6 +12,7 @@ const router = express.Router();
 
 // Place a new order
 router.post('/add', placeOrder);
+router.get("/all", getAllOrders); 
 
 // Get all orders for a user
 router.get('/user/:userId', getUserOrders);
@@ -23,5 +25,6 @@ router.put('/status/:orderId', updateOrderStatus);
 
 // Cancel an order
 router.put('/cancel/:orderId', cancelOrder);
+
 
 module.exports = router;
