@@ -3,7 +3,9 @@ const Cart = require('../models/cart'); // Import Cart model
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
+const WelcomeEmail = require('../templets/WelcomeEmail');
 
+const transporter = require('../middleware/mailConfig');
 // ✅ Generate JWT Token
 const generateToken = (user) => {
     return jwt.sign(
@@ -43,6 +45,15 @@ const registerUser = async (req, res) => {
         await Cart.create({ userId: user._id, items: [] });
 
         const token = generateToken(user);
+
+        // Send registration email
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: user.email,
+            subject: "Registration Successful. Welcome!",
+            html: WelcomeEmail({ name: user.name }),
+        };
+        await transporter.sendMail(mailOptions);
 
         res.status(201).json({
             success: true,

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const appointmentSchema = new mongoose.Schema({
-  patientId: {
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Patient', // Reference to Patient model
     required: true,
@@ -11,6 +11,11 @@ const appointmentSchema = new mongoose.Schema({
     ref: 'Doctor',
     required: true,
   },
+  userName: { type: String }, // Will be fetched dynamically
+  doctorName: { type: String }, // Will be fetched dynamically
+  age: { type: Number, required: true }, 
+  gender: { type: String, enum: ['Male', 'Female', 'Other'], required: true }, 
+  problemDescription: { type: String, required: true }, 
   date: { type: Date, required: true },
   time: { type: String, required: true },
   status: {

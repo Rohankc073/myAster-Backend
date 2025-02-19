@@ -8,7 +8,7 @@ const {
 
 const router = express.Router();
 
-// Schedule a new appointment
+// Schedule a new appointment (POST request)
 router.post('/schedule', scheduleAppointment);
 
 // Get all appointments
