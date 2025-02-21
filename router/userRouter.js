@@ -20,7 +20,7 @@ router.post('/add', authentication, authorizeRoles('Admin'), postData);
 router.get('/all', authentication, authorizeRoles('Admin'), getData);
 
 // Get a patient by ID (accessible by Admin and Doctor)
-router.get('/:id', authentication, authorizeRoles('Admin', 'Doctor'), getByID);
+router.get('/:id', getByID);
 
 // Update a patient by ID (accessible by Admin and Patient)
 router.put('/update/:id', authentication, authorizeRoles('Admin', 'Patient'), updateByID);

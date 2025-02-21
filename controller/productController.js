@@ -1,12 +1,30 @@
 const Product = require('../models/products');
 const fs = require('fs');
 const path = require('path');
+const multer = require('multer');
 
-// ✅ Add a new product (Medicine)
+// 📌 Configure Multer for Image Upload (Same as Doctor Controller)
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); // Store images in 'uploads/' directory
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname); // Unique filename
+  }
+});
+
+const upload = multer({ storage: storage });
+
+/** 
+ * ✅ Add a new product (Medicine)
+ * - Ensures the image is stored correctly in the same `/uploads/` directory
+ */
 const addProduct = async (req, res) => {
     try {
         const { name, genericName, manufacturer, price, quantity, dosage, requiresPrescription, category, description } = req.body;
-        const image = req.file ? `/uploads/products/${req.file.filename}` : "/uploads/products/default.jpg"; // Default image if none is uploaded
+
+        // Ensure image is stored correctly
+        const image = req.file ? req.file.path : null;
 
         const product = new Product({
             name,
@@ -28,40 +46,48 @@ const addProduct = async (req, res) => {
     }
 };
 
-// ✅ Fetch all medicines (Ensure image URL is correct)
+/** 
+ * ✅ Fetch all medicines (Ensure image URL is correct)
+ */
 const getProducts = async (req, res) => {
     try {
-      const products = await Product.find({});
-    //   console.log("Total products found:", products.length); // ✅ Check how many products exist
-      res.json(products);
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      res.status(500).json({ error: "Error fetching products" });
-    }
-  };
+        const products = await Product.find({});
 
-// ✅ Fetch product by ID
+        // ✅ Ensure full image URL
+        const updatedProducts = products.map((product) => ({
+            ...product._doc,
+            image: product.image ? `http://localhost:5003/${product.image}` : null, // Full URL
+        }));
+
+        res.status(200).json(updatedProducts);
+    } catch (error) {
+        console.error("Error fetching products:", error);
+        res.status(500).json({ error: "Error fetching products" });
+    }
+};
+
+/** 
+ * ✅ Fetch a single product by ID
+ */
 const getProductById = async (req, res) => {
     try {
         const { id } = req.params;
         const product = await Product.findById(id);
         if (!product) return res.status(404).json({ message: '❌ Product not found' });
 
-        // Update image URL
-        const updatedProduct = {
-            ...product._doc,
-            image: product.image.startsWith("/uploads")
-                ? `http://localhost:5003${product.image}`
-                : product.image
-        };
+        // ✅ Ensure full image URL
+        product.image = product.image ? `http://localhost:5003/${product.image}` : null;
 
-        res.status(200).json(updatedProduct);
+        res.status(200).json(product);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
-// ✅ Update a product
+/** 
+ * ✅ Update a product
+ * - Updates product details, including image.
+ */
 const updateProduct = async (req, res) => {
     try {
         const { id } = req.params;
@@ -69,9 +95,9 @@ const updateProduct = async (req, res) => {
 
         let updatedData = { name, genericName, manufacturer, price, quantity, dosage, requiresPrescription, category, description };
 
-        // If a new image is uploaded, update the image path
+        // ✅ If a new image is uploaded, update the image path
         if (req.file) {
-            updatedData.image = `/uploads/products/${req.file.filename}`;
+            updatedData.image = req.file.path;
         }
 
         const product = await Product.findByIdAndUpdate(id, updatedData, { new: true });
@@ -83,7 +109,10 @@ const updateProduct = async (req, res) => {
     }
 };
 
-// ✅ Delete a product
+/** 
+ * ✅ Delete a product
+ * - Removes the product record and deletes the image from the server.
+ */
 const deleteProduct = async (req, res) => {
     try {
         const { id } = req.params;
@@ -94,8 +123,8 @@ const deleteProduct = async (req, res) => {
             return res.status(404).json({ message: '❌ Product not found' });
         }
 
-        // Delete the product image from the server if exists
-        if (product.image && product.image !== "/uploads/products/default.jpg") {
+        // ✅ Delete the product image from the server if it exists
+        if (product.image) {
             const imagePath = path.join(__dirname, '..', product.image);
             if (fs.existsSync(imagePath)) {
                 fs.unlinkSync(imagePath); // Delete file safely
@@ -111,4 +140,4 @@ const deleteProduct = async (req, res) => {
     }
 };
 
-module.exports = { addProduct, getProducts, updateProduct, deleteProduct, getProductById };
+module.exports = { addProduct, getProducts, updateProduct, deleteProduct, getProductById, upload };

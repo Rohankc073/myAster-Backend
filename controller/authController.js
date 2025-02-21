@@ -59,7 +59,12 @@ const registerUser = async (req, res) => {
             success: true,
             message: "User registered successfully",
             token,
-            user: { name: user.name, email: user.email, role: user.role }
+            user: { 
+                id: user._id,  // ✅ Ensure ID is included
+                name: user.name, 
+                email: user.email, 
+                role: user.role 
+            }
         });
 
     } catch (error) {

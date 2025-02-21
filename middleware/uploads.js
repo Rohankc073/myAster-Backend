@@ -1,10 +1,18 @@
 const multer = require("multer");
-const maxSize = 2 * 1024 * 1024; // 2MB
+const fs = require("fs");
 const path = require("path");
+
+const maxSize = 2 * 1024 * 1024; // 2MB
+
+// Ensure upload directory exists
+const uploadPath = path.join(__dirname, "..", "uploads", "products");
+if (!fs.existsSync(uploadPath)) {
+  fs.mkdirSync(uploadPath, { recursive: true });
+}
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/");
+    cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
     let ext = path.extname(file.originalname);
@@ -23,6 +31,6 @@ const upload = multer({
   storage: storage,
   fileFilter: imageFileFilter,
   limits: { fileSize: maxSize },
-}).single("profilePicture");
+}).single("profilePicture"); // ✅ Changed "profilePicture" to "image" for products
 
 module.exports = upload;
