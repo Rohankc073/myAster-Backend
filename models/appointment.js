@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const appointmentSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Patient', // Reference to Patient model
+    ref: 'User', // Reference to Patient model
     required: true,
   },
   doctorId: {

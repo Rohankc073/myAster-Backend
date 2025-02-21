@@ -1,145 +1,113 @@
-// const chai = require("chai");
-// const chaiHttp = require("chai-http");
-// const app = require("../index"); // Ensure this points to your server entry file
-// const { expect } = chai;
+const chai = require("chai");
+const chaiHttp = require("chai-http");
+const app = require("../index"); // Your server file
+const { expect } = chai;
 
-// chai.use(chaiHttp);
+chai.use(chaiHttp);
 
-// describe("Authentication API Tests", () => {
-//     let userToken = "";
-//     let adminToken = "";
-//     let userId = "";
+describe("User API Tests", () => {
+    let userToken = ""; // Store JWT Token
+    let userId = ""; // Store User ID
 
-//     // ✅ Generate a unique email for each test run
-//     const testEmail = `testuser${Date.now()}@example.com`;
+    // ✅ Test User Registration
+    it("should register a new user", async function () {
+        this.timeout(5000);
+        try {
+            const res = await chai.request(app)
+                .post("/auth/register")
+                .send({
+                    name: "Test User",
+                    email: "testuser1234@example.com",
+                    password: "password123",
+                    phone: "9876543211",
+                    role: "Admin"
+                });
 
-//     // ✅ Test User Registration
-//     it("should register a new user", async function () {
-//         this.timeout(10000); // Increased timeout to 10 seconds
+            console.log("User Registration Response:", res.body); // Debug Log
 
-//         try {
-//             const res = await chai.request(app)
-//                 .post("/auth/register")
-//                 .send({
-//                     name: "Test User",
-//                     email: testEmail, // Unique email to avoid conflicts
-//                     password: "Test@123",
-//                     phone: "9876033010",
-//                     role: "Patient"
-//                 });
+            expect(res).to.have.status(201);
+            expect(res.body).to.have.property("message", "User registered successfully");
+            userId = res.body.user.id;
+        } catch (error) {
+            console.error("User Registration Error:", error.response ? error.response.body : error);
+            throw error;
+        }
+    });
 
-//             console.log("Registration Response:", res.body); // Debugging Log
+    // ✅ Test User Login
+    it("should login the user and return a JWT token", async function () {
+        this.timeout(5000);
+        try {
+            const res = await chai.request(app)
+                .post("/auth/login")
+                .send({
+                    email: "testuser1234@example.com",
+                    password: "password123"
+                });
 
-//             expect(res).to.have.status(201);
-//             expect(res.body).to.have.property("success", true);
-//             expect(res.body).to.have.property("token");
-//             expect(res.body).to.have.property("user");
+            console.log("User Login Response:", res.body); // Debug Log
 
-//             userToken = res.body.token;
-//             userId = res.body.user._id;
+            expect(res).to.have.status(200);
+            expect(res.body).to.have.property("token");
+            userToken = res.body.token; // Store JWT Token for further tests
+        } catch (error) {
+            console.error("User Login Error:", error.response ? error.response.body : error);
+            throw error;
+        }
+    });
 
-//             if (!userId) throw new Error("User ID not returned in registration response");
-//         } catch (error) {
-//             throw error;
-//         }
-//     });
+    // ✅ Test Fetching User Profile (Protected Route)
+    it("should fetch the user profile using JWT Token", async function () {
+        this.timeout(5000);
+        try {
+            const res = await chai.request(app)
+                .get(`/user/${userId}`)
+                .set("Authorization", `Bearer ${userToken}`);
 
-//     // ✅ Test Admin Login
-//     it("should log in an admin user", async function () {
-//         this.timeout(10000);
-//         try {
-//             const res = await chai.request(app)
-//                 .post("/auth/login")
-//                 .send({
-//                     email: "admin@gmail.com", // Ensure this admin exists in DB
-//                     password: "admin123"
-//                 });
+            console.log("User Profile Response:", res.body); // Debug Log
 
-//             console.log("Admin Login Response:", res.body); // Debugging Log
+            expect(res).to.have.status(200);
+            expect(res.body).to.have.property("_id", userId);
+        } catch (error) {
+            console.error("User Profile Fetch Error:", error.response ? error.response.body : error);
+            throw error;
+        }
+    });
 
-//             expect(res).to.have.status(200);
-//             expect(res.body).to.have.property("token");
+    // ✅ Test Updating User Profile
+    it("should update the user profile", async function () {
+        this.timeout(5000);
+        try {
+            const res = await chai.request(app)
+                .put(`/user/update/${userId}`)
+                .set("Authorization", `Bearer ${userToken}`)
+                .send({ phone: "9998887776" });
 
-//             adminToken = res.body.token;
-//         } catch (error) {
-//             throw error;
-//         }
-//     });
+            console.log("User Update Response:", res.body); // Debug Log
 
-//     // ✅ Test Fetching All Users (Admin Only)
-//     it("should fetch all users (Admin Only)", async function () {
-//         this.timeout(10000);
-//         try {
-//             const res = await chai.request(app)
-//                 .get("/user/all")
-//                 .set("Authorization", `Bearer ${adminToken}`);
+            expect(res).to.have.status(200);
+            expect(res.body).to.have.property("message", "Patient updated successfully");
+        } catch (error) {
+            console.error("User Update Error:", error.response ? error.response.body : error);
+            throw error;
+        }
+    });
 
-//             console.log("Fetch Users Response:", res.body); // Debugging Log
+    // ✅ Test Deleting a User
+    it("should delete the user account", async function () {
+        this.timeout(5000);
+        try {
+            const res = await chai.request(app)
+                .delete(`/user/${userId}`)
+                .set("Authorization", `Bearer ${userToken}`);
 
-//             expect(res).to.have.status(200);
-//             expect(res.body).to.be.an("array");
-//         } catch (error) {
-//             throw error;
-//         }
-//     });
+            console.log("User Delete Response:", res.body); // Debug Log
 
-//     // ✅ Test Fetching a User by ID
-//     it("should fetch a user by ID", async function () {
-//         this.timeout(10000);
-//         if (!userId) throw new Error("User ID not set - Registration might have failed");
-
-//         try {
-//             const res = await chai.request(app)
-//                 .get(`/user/${userId}`)
-//                 .set("Authorization", `Bearer ${userToken}`);
-
-//             console.log("Fetch User Response:", res.body); // Debugging Log
-
-//             expect(res).to.have.status(200);
-//             expect(res.body).to.have.property("_id", userId);
-//         } catch (error) {
-//             throw error;
-//         }
-//     });
-
-//     // ✅ Test Updating a User
-//     it("should update a user", async function () {
-//         this.timeout(10000);
-//         if (!userId) throw new Error("User ID not set - Registration might have failed");
-
-//         try {
-//             const res = await chai.request(app)
-//                 .put(`/user/${userId}`)
-//                 .set("Authorization", `Bearer ${userToken}`)
-//                 .send({
-//                     name: "Updated Test User"
-//                 });
-
-//             console.log("Update User Response:", res.body); // Debugging Log
-
-//             expect(res).to.have.status(200);
-//             expect(res.body).to.have.property("success", true);
-//         } catch (error) {
-//             throw error;
-//         }
-//     });
-
-//     // ✅ Test Deleting a User (Admin Only)
-//     it("should delete a user (Admin Only)", async function () {
-//         this.timeout(10000);
-//         if (!userId) throw new Error("User ID not set - Registration might have failed");
-
-//         try {
-//             const res = await chai.request(app)
-//                 .delete(`/user/${userId}`)
-//                 .set("Authorization", `Bearer ${adminToken}`);
-
-//             console.log("Delete User Response:", res.body); // Debugging Log
-
-//             expect(res).to.have.status(200);
-//             expect(res.body).to.have.property("success", true);
-//         } catch (error) {
-//             throw error;
-//         }
-//     });
-// });
+            expect(res).to.have.status(200);
+            expect(res.body).to.have.property("message", "Patient deleted successfully");
+        } catch (error) {
+            console.error("User Delete Error:", error.response ? error.response.body : error);
+            throw error;
+        }
+    });
+});

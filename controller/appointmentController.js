@@ -4,6 +4,7 @@ const Doctor = require("../models/doctor");
 const transporter = require("../middleware/mailConfig"); // ✅ Use Existing Email Middleware
 const AppointmentEmail = require("../templets/AppointmentEmail"); // ✅ New Email Template
 
+// ✅ Schedule an Appointment
 const scheduleAppointment = async (req, res) => {
   try {
     const { userId, doctorId, age, gender, problemDescription, date, time } = req.body;
@@ -57,12 +58,22 @@ const scheduleAppointment = async (req, res) => {
   }
 };
 
-// Get all appointments
+// ✅ Get all appointments (including user name)
+// ✅ Get all appointments (including user name)
 const getAllAppointments = async (req, res) => {
   try {
-    const appointments = await Appointment.find()
-      .populate('userId', 'name age gender') // Fetch patient details
-      .populate('doctorId', 'name specialization'); // Fetch doctor details
+    const { userId } = req.query; // ✅ Get userId from query params
+
+    let query = {}; // Default: Fetch all appointments
+
+    // ✅ If userId exists, fetch only that user's appointments
+    if (userId) {
+      query.userId = userId;
+    }
+
+    const appointments = await Appointment.find(query)
+      .populate('userId', 'name email age gender') // ✅ Populate User Info
+      .populate('doctorId', 'name specialization'); // ✅ Populate Doctor Info
 
     res.status(200).json(appointments);
   } catch (error) {
@@ -70,13 +81,15 @@ const getAllAppointments = async (req, res) => {
   }
 };
 
-// Get appointments by ID
+
+
+// ✅ Get a single appointment by ID (including user name)
 const getAppointmentById = async (req, res) => {
   try {
     const { id } = req.params;
     const appointment = await Appointment.findById(id)
-      .populate('userId', 'name age gender')
-      .populate('doctorId', 'name specialization');
+      .populate('userId', 'name email age gender') // Fetch user details
+      .populate('doctorId', 'name specialization'); // Fetch doctor details
 
     if (!appointment) {
       return res.status(404).json({ error: 'Appointment not found' });
@@ -88,15 +101,16 @@ const getAppointmentById = async (req, res) => {
   }
 };
 
-// Cancel an appointment
+// ✅ Cancel an Appointment
 const cancelAppointment = async (req, res) => {
   try {
     const { id } = req.params;
     const updatedAppointment = await Appointment.findByIdAndUpdate(
       id,
-      { status: 'cancelled' },
+      { status: 'Cancelled' },
       { new: true }
-    );
+    ).populate('userId', 'name email age gender'); // ✅ Show user details even after cancellation
+
     if (!updatedAppointment) {
       return res.status(404).json({ error: 'Appointment not found' });
     }

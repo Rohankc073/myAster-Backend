@@ -22,7 +22,7 @@ const addToCart = async (req, res) => {
             productId,
             name: product.name,
             price: product.price,
-            image: product.image,
+            image: `http://localhost:5003/${product.image}`, // ✅ Ensure full URL
             description: product.description,
             quantity,
           },
@@ -38,7 +38,7 @@ const addToCart = async (req, res) => {
           productId,
           name: product.name,
           price: product.price,
-          image: product.image,
+          image: `http://localhost:5003/${product.image}`, // ✅ Ensure full URL
           description: product.description,
           quantity,
         });
@@ -53,17 +53,30 @@ const addToCart = async (req, res) => {
   }
 };
 
+
 // ✅ Get user cart
 const getCartItems = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    const cart = await Cart.findOne({ userId });
-    if (!cart) {
-      return res.status(404).json({ message: "Cart not found" });
+    const cart = await Cart.findOne({ userId }).populate("items.productId", "name price image description");
+    if (!cart || cart.items.length === 0) {
+      return res.status(404).json({ message: "Cart is empty" });
     }
 
-    res.status(200).json(cart);
+    // ✅ Ensure the full image URL is returned
+    const updatedCart = {
+      ...cart._doc,
+      items: cart.items.map((item) => ({
+        ...item._doc,
+        productId: {
+          ...item.productId._doc,
+          image: item.productId.image ? `http://localhost:5003/${item.productId.image}` : "https://via.placeholder.com/80",
+        },
+      })),
+    };
+
+    res.status(200).json(updatedCart);
   } catch (error) {
     console.error("❌ Error fetching cart:", error);
     res.status(500).json({ message: "Server error", error: error.message });
