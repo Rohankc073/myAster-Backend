@@ -2,7 +2,9 @@ const User = require('../models/user'); // Ensure this points to the correct Use
 const Cart = require('../models/cart'); // Import Cart model
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-require('dotenv').config();
+
+require("dotenv").config();
+const ResetPasswordEmail = require('../templets/ResetPasswordEmail')
 const WelcomeEmail = require('../templets/WelcomeEmail');
 
 const transporter = require('../middleware/mailConfig');
@@ -31,7 +33,7 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: "Email already registered" });
         }
 
-        // const hashedPassword = await bcrypt.hash(password, 10); // Hash the password
+
 
         const user = await User.create({
             name,
@@ -99,12 +101,12 @@ const loginUser = async (req, res) => {
             message: "Login successful",
             token,
             user: {
-                _id: user._id, // ✅ Ensure _id is included
-                name: user.name,
+                userId: user._id, // ✅ Ensure _id is included
+                username: user.name,
                 email: user.email,
                 role: user.role
             },
-            cart: cart || { userId: user._id, items: [] } // Return cart or empty cart
+            // cart: cart || { userId: user._id, items: [] } // Return cart or empty cart
         });
 
         res.status(200).json({
@@ -146,4 +148,90 @@ const uploadImage = async (req, res) => {
     }
 };
 
-module.exports = { registerUser, loginUser, uploadImage };
+
+// Request Password Reset - Generate a Reset Token and send via email
+const resetPasswordRequest = async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).send({ message: "Email is required" });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).send({ message: "User not found" });
+        }
+
+        // Create a reset token (expires in 1 hour)
+        const resetToken = jwt.sign(
+            { user_id: user._id },
+            process.env.SECRET_KEY, // ✅ Fix: Use process.env.SECRET_KEY
+            { expiresIn: process.env.RESET_TOKEN_EXPIRY }
+        );
+
+        // Construct reset link
+        const resetLink = `${process.env.CLIENT_URL}/reset-password?token=${resetToken}`;
+
+        // In your email sending logic
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: user.email,
+            subject: "Password Reset Request",
+            html: ResetPasswordEmail({ email: user.email, resetLink }),
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        res.status(200).send({ message: "Password reset email sent" });
+    } catch (error) {
+        console.error(error); // Log the error for debugging
+        res.status(500).send({ message: "Error in sending reset email", error: error.message });
+    }
+};
+
+const resetPassword = async (req, res) => {
+    try {
+        const { token, newPassword } = req.body;
+
+        console.log("🔹 Received Token for Reset:", token);  // Debugging Step
+
+        // ✅ Verify the reset token
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.SECRET_KEY);
+        } catch (error) {
+            console.error("❌ Token Verification Error:", error.message);
+            return res.status(400).json({ message: "Invalid or expired reset token" });
+        }
+
+        console.log("🔹 Decoded Token:", decoded);
+
+        // ✅ Find the user associated with the token
+        const user = await User.findById(decoded.user_id);
+        if (!user) {
+            console.error("❌ User Not Found");
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        console.log("🔹 User Found:", user.email);
+
+        // ✅ Ensure new password is provided
+        if (!newPassword || newPassword.length < 6) {
+            return res.status(400).json({ message: "Password must be at least 6 characters long" });
+        }
+
+        // ✅ Set new password (Mongoose will trigger the pre("save") middleware)
+        user.password = newPassword; 
+        user.markModified("password");  // 🔥 Ensure Mongoose detects the change
+        await user.save(); // ✅ Triggers pre("save") middleware automatically
+
+        console.log("✅ Password Updated Successfully in Database!");
+
+        return res.status(200).json({ message: "Password reset successfully. You can now log in with your new password." });
+    } catch (error) {
+        console.error("❌ Error resetting password:", error);
+        return res.status(500).json({ message: "Server error", error });
+    }
+};
+
+module.exports = { registerUser, loginUser, uploadImage,resetPasswordRequest ,resetPassword};

@@ -65,8 +65,4 @@ describe("Backend API Tests", () => {
             expect(res.body).to.have.property("message", "✅ Product deleted successfully");
         });
     });
-
-    /**
-     * ✅ Test Doctor API (Now Matches Routes)
-     */
     });

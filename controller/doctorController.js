@@ -55,11 +55,15 @@ const createDoctor = async (req, res) => {
 const getAllDoctors = async (req, res) => {
   try {
     const doctors = await Doctor.find();
-    
-    // ✅ Ensure the full image URL is included
+
+    // ✅ Ensure all fields have valid fallback values
     const updatedDoctors = doctors.map((doctor) => ({
       ...doctor._doc,
-      image: doctor.image ? `http://localhost:5003/${doctor.image}` : null, // Full URL
+      name: doctor.name || "Unknown Doctor",
+      specialization: doctor.specialization || "General",
+      email: doctor.email || "No email available",
+      contact: doctor.contact || "No contact info",
+      image: doctor.image ? `http://localhost:5003/${doctor.image}` : "https://via.placeholder.com/150", // Placeholder for missing images
     }));
 
     res.status(200).json(updatedDoctors);
@@ -67,6 +71,7 @@ const getAllDoctors = async (req, res) => {
     res.status(500).json({ error: "Error fetching doctors", details: error.message });
   }
 };
+
 
 
 /** 

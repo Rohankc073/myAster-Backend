@@ -17,7 +17,7 @@ describe("User API Tests", () => {
                 .post("/auth/register")
                 .send({
                     name: "Test User",
-                    email: "testuser1234@example.com",
+                    email: "testuser1006@example.com",
                     password: "password123",
                     phone: "9876543211",
                     role: "Admin"
@@ -41,7 +41,7 @@ describe("User API Tests", () => {
             const res = await chai.request(app)
                 .post("/auth/login")
                 .send({
-                    email: "testuser1234@example.com",
+                    email: "testuser1006@example.com",
                     password: "password123"
                 });
 
