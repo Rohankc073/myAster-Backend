@@ -17,10 +17,10 @@ describe("User API Tests", () => {
                 .post("/auth/register")
                 .send({
                     name: "Test User",
-                    email: "testuser1006@example.com",
+                    email: "test120@gmail.com",
                     password: "password123",
                     phone: "9876543211",
-                    role: "Admin"
+                    role: "Patient"
                 });
 
             console.log("User Registration Response:", res.body); // Debug Log
@@ -41,8 +41,8 @@ describe("User API Tests", () => {
             const res = await chai.request(app)
                 .post("/auth/login")
                 .send({
-                    email: "testuser1006@example.com",
-                    password: "password123"
+                    email: "admin@gmail.com",
+                    password: "admin123"
                 });
 
             console.log("User Login Response:", res.body); // Debug Log
