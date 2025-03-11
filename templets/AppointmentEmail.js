@@ -83,7 +83,7 @@ const AppointmentEmail = ({ userName, doctorName, date, time }) => `
       <div class="appointment-details">
         <p><strong>📅 Date:</strong> ${date}</p>
         <p><strong>⏰ Time:</strong> ${time}</p>
-        <p><strong>👨‍⚕️ Doctor:</strong> Dr. ${doctorName}</p>
+        <p><strong>👨‍⚕️ Doctor:</strong> ${doctorName}</p>
       </div>
 
       <p>Thank you for choosing myAster for your healthcare needs. If you have any questions, feel free to contact us.</p>

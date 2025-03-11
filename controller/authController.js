@@ -2,10 +2,96 @@ const User = require('../models/user'); // Ensure this points to the correct Use
 const Cart = require('../models/cart'); // Import Cart model
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const crypto = require("crypto"); // To generate OTP
+const OTPEmail = require("../templets/OTPEmail");
+
 
 require("dotenv").config();
 const ResetPasswordEmail = require('../templets/ResetPasswordEmail')
 const WelcomeEmail = require('../templets/WelcomeEmail');
+
+const SECRET_KEY = process.env.SECRET_KEY;
+const OTP_EXPIRY = 3600 * 1000; // 1 hour in milliseconds
+
+// Store OTPs in memory (for simplicity). You can use a database instead.
+const otpStorage = new Map();
+
+// Reset Password for Mobile (Send OTP)
+const resetPasswordMobile = async (req, res) => {
+    try {
+
+        const { email } = req.body;
+        
+        if (!email) {
+            return res.status(400).send({ message: "Email is required" });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).send({ message: "User not found" });
+        }
+
+        // Generate a 6-digit OTP
+        const otp = crypto.randomInt(100000, 999999).toString();
+        const expiry = Date.now() + OTP_EXPIRY;
+
+        // Store OTP in memory (use a database for production)
+        otpStorage.set(email, { otp, expiry });
+
+        // Send OTP email
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: "Password Reset OTP",
+            html: OTPEmail({ otp }),
+        };
+        await transporter.sendMail(mailOptions);
+
+        res.status(200).send({ message: "OTP sent to email" });
+    } catch (error) {
+        console.error("Error sending OTP:", error);
+        res.status(500).send({ message: "Error sending OTP", error });
+    }
+};
+
+// Verify OTP & Reset Password
+const verifyOTPAndResetPassword = async (req, res) => {
+    try {
+        const {email, otp, newPassword} = req.body;
+
+        if (!email || !otp || !newPassword) {
+            return res.status(400).send({message: "All fields are required"});
+        }
+
+        const storedOTP = otpStorage.get(email);
+
+        if (!storedOTP || storedOTP.otp !== otp) {
+            return res.status(400).send({message: "Invalid OTP"});
+        }
+
+        if (Date.now() > storedOTP.expiry) {
+            return res.status(400).send({message: "OTP expired. Please request a new one."});
+        }
+
+        // Remove OTP from storage after use
+        otpStorage.delete(email);
+
+        // // Hash the new password
+        // const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Update user password
+        const user = await User.findOne({email});
+        user.password = newPassword;
+        await user.save();
+
+        res.status(200).send({message: "Password reset successfully"});
+    } catch (error) {
+        console.error("Error resetting password:", error);
+        res.status(500).send({message: "Error resetting password", error});
+    }
+};
+
+
 
 const transporter = require('../middleware/mailConfig');
 // ✅ Generate JWT Token
@@ -234,4 +320,4 @@ const resetPassword = async (req, res) => {
     }
 };
 
-module.exports = { registerUser, loginUser, uploadImage,resetPasswordRequest ,resetPassword};
+module.exports = { registerUser, loginUser, uploadImage,resetPasswordRequest ,resetPassword, resetPasswordMobile, verifyOTPAndResetPassword};

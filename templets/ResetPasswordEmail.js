@@ -22,7 +22,7 @@ const ResetPasswordEmail = ({ email, resetLink }) => `
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
     .email-header {
-      background-color: #9B6763;
+      background-color: #2A5593; /* myAster blue color */
       color: #fff;
       padding: 20px;
       text-align: center;
@@ -36,7 +36,7 @@ const ResetPasswordEmail = ({ email, resetLink }) => `
     .email-body h1 {
       font-size: 24px;
       margin-bottom: 10px;
-      color: #9B6763;
+      color: #0077b6;
     }
     .email-body p {
       font-size: 16px;
@@ -48,7 +48,7 @@ const ResetPasswordEmail = ({ email, resetLink }) => `
       padding: 10px 20px;
       font-size: 16px;
       text-decoration: none;
-      background-color: #9B6763;
+      background-color: #0077b6;
       color: #fff;
       border-radius: 4px;
     }
@@ -64,7 +64,8 @@ const ResetPasswordEmail = ({ email, resetLink }) => `
 <body>
   <div class="email-container">
     <div class="email-header">
-      <img src="http://localhost:5000/templates/logo.png" alt="Nirliptah Yoga">
+      <img src="https://drive.google.com/uc?id=1kMW_TVwMnorRllJKUvCwviDJiwfYtJfu" alt="myAster Logo" width="150">
+
       <h1>Password Reset Request</h1>
     </div>
     <div class="email-body">
@@ -75,8 +76,8 @@ const ResetPasswordEmail = ({ email, resetLink }) => `
       <p>If you did not request a password reset, please ignore this email or contact us if you have concerns.</p>
     </div>
     <div class="email-footer">
-      <p>&copy; ${new Date().getFullYear()} Nirliptah Yoga by Nivedita Pradhan. All rights reserved.</p>
-      <p>[Your Address or Contact Information]</p>
+      <p>&copy; ${new Date().getFullYear()} myAster HMS+E-Pharmacy. All rights reserved.</p>
+      <p>Contact us at: support@myaster.com</p>
     </div>
   </div>
 </body>
