@@ -28,6 +28,7 @@ app.use('/cart', require('./router/cartRouter'));
 app.use('/order', require('./router/orderRouter'));
 app.use('/review', require('./router/reviewRouter'));
 app.use('/services', require('./router/serviceRouter'));
+app.use('/packages', require('./router/packageRouter'));
 app.use('/booking', require('./router/service_bookingRouter'));
 
 // Start the server only when not in test mode
