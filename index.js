@@ -30,6 +30,7 @@ app.use('/review', require('./router/reviewRouter'));
 app.use('/services', require('./router/serviceRouter'));
 app.use('/packages', require('./router/packageRouter'));
 app.use('/booking', require('./router/service_bookingRouter'));
+app.use('/category', require('./router/categoryRouter'));
 
 // Start the server only when not in test mode
 const PORT = 5003;

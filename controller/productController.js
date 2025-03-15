@@ -21,11 +21,13 @@ const upload = multer({ storage: storage });
  */
 const addProduct = async (req, res) => {
     try {
+        // Destructure fields including the category from req.body
         const { name, genericName, manufacturer, price, quantity, dosage, requiresPrescription, category, description } = req.body;
 
         // Ensure image is stored correctly
         const image = req.file ? req.file.path : null;
 
+        // Create a new product document
         const product = new Product({
             name,
             genericName,
@@ -34,17 +36,22 @@ const addProduct = async (req, res) => {
             quantity,
             dosage,
             requiresPrescription,
-            category,
+            category,  // Ensure category is added
             description,
             image,
         });
 
+        // Save the product to the database
         await product.save();
+
+        // Send success response
         res.status(201).json({ message: '✅ Product added successfully', product });
     } catch (error) {
+        // Handle error and send a bad request response
         res.status(400).json({ error: error.message });
     }
 };
+
 
 /** 
  * ✅ Fetch all medicines (Ensure image URL is correct)
