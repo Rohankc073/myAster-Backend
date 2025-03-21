@@ -30,6 +30,23 @@ const getCategories = async (req, res) => {
   }
 };
 
+const getCategoriesWithProducts = async (req, res) => {
+  try {
+    const categories = await Category.find().lean();
+    const categoriesWithProducts = await Promise.all(
+      categories.map(async (category) => {
+        const product = await Product.findOne({ category: category._id }).select("image").lean();
+        return { ...category, products: product ? [product] : [] };
+      })
+    );
+
+    res.status(200).json(categoriesWithProducts);
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    res.status(500).json({ message: "Error fetching categories" });
+  }
+};
+
 // ✅ Update a category
 const updateCategory = async (req, res) => {
   try {
@@ -64,4 +81,4 @@ const deleteCategory = async (req, res) => {
   }
 };
 
-module.exports = { addCategory, getCategories, updateCategory, deleteCategory };
+module.exports = { addCategory, getCategories, updateCategory, deleteCategory, getCategoriesWithProducts };

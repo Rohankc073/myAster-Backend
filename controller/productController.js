@@ -58,7 +58,8 @@ const addProduct = async (req, res) => {
  */
 const getProducts = async (req, res) => {
     try {
-        const products = await Product.find({});
+        // ✅ Populate category name instead of just returning the ID
+        const products = await Product.find().populate("category", "name");
 
         // ✅ Ensure full image URL
         const updatedProducts = products.map((product) => ({
@@ -90,6 +91,8 @@ const getProductById = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+
 
 /** 
  * ✅ Update a product

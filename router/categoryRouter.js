@@ -1,5 +1,5 @@
 const express = require("express");
-const { addCategory, getCategories, updateCategory, deleteCategory } = require("../controller/CategoryController");
+const { addCategory, getCategories, updateCategory, deleteCategory, getCategoriesWithProducts } = require("../controller/CategoryController");
 
 const router = express.Router();
 
@@ -14,5 +14,8 @@ router.put("/:id", updateCategory);
 
 // ✅ Route to delete a category by ID
 router.delete("/:id", deleteCategory);
+
+router.get("/category/with-products", getCategoriesWithProducts);
+
 
 module.exports = router;

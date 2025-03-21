@@ -8,7 +8,7 @@ const productSchema = new mongoose.Schema({
     quantity: { type: Number, required: true },
     dosage: { type: String },
     requiresPrescription: { type: Boolean, default: false },
-    category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },  // 🔹 Link to Category Model
+    category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },  // ✅ Reference Category model
     image: { type: String, default: null },
     description: { type: String },
 });
